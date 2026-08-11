@@ -1,2 +1,5 @@
+Version 1.0.1
+- Sort active subscriptions by next renewal date, inactive alphabetically
+
 Version 1.0.0
 - Initial release

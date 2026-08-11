@@ -418,9 +418,11 @@
       '</span></li>';
   }
 
+  function renewTime(d){ return d ? Date.parse(d + 'T00:00:00') : Infinity; }
+
   function render(){
-    const active = subs.filter(isActive);
-    const inactive = subs.filter(s => !isActive(s));
+    const active = subs.filter(isActive).sort((a, b) => renewTime(a.renewal) - renewTime(b.renewal));
+    const inactive = subs.filter(s => !isActive(s)).sort((a, b) => a.name.localeCompare(b.name));
     let total = 0, monthly = 0, yearly = 0;
     active.forEach(s => {
       total += toMonthly(s);
