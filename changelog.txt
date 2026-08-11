@@ -1,5 +1,2 @@
-Version 1.1.1
-- Dropbox sync: connect with your own App key, upload/download backups, auto-upload edits, auto-sync on launch
-
 Version 1.0.0
 - Initial release
