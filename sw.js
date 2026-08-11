@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const CACHE = 'leakshark-' + VERSION;
 const ASSETS = [
   './index.html',
