@@ -207,7 +207,7 @@
     padding:28px;
   }
   .sync-panel .sync-body{margin-top:16px}
-  .sync-panel .desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+  .desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
   .sync-status{font-size:11px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:20px;white-space:nowrap}
   .sync-status.on{background:rgba(62,207,142,.15);color:#2e9e6b}
   .sync-status.off{background:rgba(107,106,102,.14);color:var(--muted)}
@@ -355,6 +355,17 @@
           <button class="btn btn-ghost" id="dbx-disconnect">Disconnect</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backup &amp; restore</h2>
+    <p class="desc">Export your subscriptions to a file you keep anywhere — or bring them back from a backup.</p>
+    <div class="dbx-actions">
+      <button class="btn" id="export-json">Export JSON</button>
+      <button class="btn btn-ghost" id="export-csv">Export CSV</button>
+      <button class="btn btn-ghost" id="import-btn">Import JSON</button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none">
     </div>
   </section>
 
@@ -803,6 +814,47 @@
     save(); render();
   }
 
+  function downloadFile(name, content, mime){
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportJSON(){
+    const payload = { app: 'LeakShark', version: 1, exportedAt: new Date().toISOString(), data: subs };
+    const name = 'leakshark-backup-' + fmtYMD(new Date()) + '.json';
+    downloadFile(name, JSON.stringify(payload, null, 2), 'application/json');
+    toast('Exported ' + subs.length + ' subscriptions to JSON');
+  }
+  function csvCell(v){
+    const s = String(v == null ? '' : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCSV(){
+    const rows = [
+      ['name', 'cost', 'cycle', 'renewal', 'cancel'].join(','),
+      ...subs.map(s => [s.name, s.cost, s.cycle, s.renewal, s.cancel || ''].map(csvCell).join(','))
+    ];
+    const name = 'leakshark-backup-' + fmtYMD(new Date()) + '.csv';
+    downloadFile(name, rows.join('\r\n'), 'text/csv');
+    toast('Exported ' + subs.length + ' subscriptions to CSV');
+  }
+  function importFromFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const d = parseBackupJSON(String(reader.result));
+        if(!confirm('Import ' + d.length + ' subscriptions? It will replace all current subscriptions.')) return;
+        applyRestoredData(d);
+        toast('Imported ' + d.length + ' subscriptions');
+      }catch(err){ toast('Import failed: invalid backup file'); }
+    };
+    reader.onerror = () => toast('Import failed: could not read the file');
+    reader.readAsText(file);
+  }
+
   function setDbxDropdownOpen(open){
     document.querySelector('.sync-panel').classList.toggle('closed', !open);
     document.getElementById('dbxSectionToggle').setAttribute('aria-expanded', open);
@@ -836,6 +888,15 @@
   document.getElementById('dbx-disconnect').addEventListener('click', dropboxDisconnect);
   document.getElementById('dbx-auto-upload').addEventListener('change', e => dropboxSetAutoUpload(e.target.checked));
   document.getElementById('dbx-auto-sync').addEventListener('change', e => dropboxSetAutoSync(e.target.checked));
+
+  document.getElementById('export-json').addEventListener('click', exportJSON);
+  document.getElementById('export-csv').addEventListener('click', exportCSV);
+  const importFileEl = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => importFileEl.click());
+  importFileEl.addEventListener('change', () => {
+    if(importFileEl.files[0]) importFromFile(importFileEl.files[0]);
+    importFileEl.value = '';
+  });
 
   window.addEventListener('pagehide', () => {
     if(_syncTimer && dbx.accessToken && dbx.autoUpload){
