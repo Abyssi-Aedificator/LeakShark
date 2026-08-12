@@ -1,5 +1,14 @@
 Version 1.0.1
 - Sort active subscriptions by next renewal date, inactive alphabetically
+- Fix auto-sync re-downloading and overwriting local edits
+- Fix silent overwrite of local data on first sync
+- Fix unhandled errors when offline during Dropbox sync
+- Fix stale newer-backup hint after reconnect
+- Fix subscription order when a renewal date is invalid
+- Fix edit form showing undefined as a renewal date
+- Fix misleading no-backup message on download errors
+- Fix service worker caching failed responses
+- Fix pending auto-upload being dropped on close
 
 Version 1.0.0
 - Initial release
