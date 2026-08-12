@@ -232,7 +232,6 @@
     border:1px solid var(--line);
     padding:28px;
   }
-  .sync-panel .sync-body{margin-top:16px}
   .desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
   .sync-status{font-size:11px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:20px;white-space:nowrap}
   .sync-status.on{background:rgba(62,207,142,.15);color:#2e9e6b}
@@ -241,11 +240,6 @@
   .dbx-meta{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
   .dbx-toggle{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink);margin-bottom:10px;cursor:pointer;user-select:none}
   .dbx-toggle input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
-  .sync-panel.closed .sync-body{display:none}
-  .dbx-head-right{display:flex;align-items:center;gap:12px}
-  .sync-panel .form-toggle{padding:0}
-  .sync-panel .form-toggle .chevron{transform:rotate(0)}
-  .sync-panel:not(.closed) .form-toggle .chevron{transform:rotate(180deg)}
   .settings-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
   .settings-head h2{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
   .settings-page section{border:1px solid var(--line);padding:28px}
@@ -360,14 +354,11 @@
       </label>
     </section>
 
-  <section class="sync-panel closed">
-    <button type="button" class="form-toggle" id="dbxSectionToggle" aria-expanded="false">
-      <span>Dropbox sync</span>
-      <span class="dbx-head-right">
-        <span id="dbx-status" class="sync-status off">Not connected</span>
-        <span class="chevron">&#8595;</span>
-      </span>
-    </button>
+  <section class="sync-panel">
+    <div class="settings-head">
+      <h2>Dropbox sync</h2>
+      <span id="dbx-status" class="sync-status off">Not connected</span>
+    </div>
     <div class="sync-body">
       <p class="desc">Sync your subscriptions through your own Dropbox account so the same data is available on your PC and your phone. Your data goes straight from your browser to your Dropbox — never through any server of ours.</p>
       <div id="dbx-setup">
@@ -706,7 +697,7 @@
     if(!key){ toast('Enter your Dropbox App key first'); return; }
     if(key.toLowerCase() === 'mock'){
       dbx = {appKey:'mock',accessToken:'mock_token',refreshToken:'',expiresAt:Date.now()+864e5,account:'demo@example.com',lastSync:'just now',lastSyncAt:Date.now(),autoSync:true,autoUpload:true};
-      dbxSave(); updateDropboxUI(); setDbxDropdownOpen(false); dbxScroll();
+      dbxSave(); updateDropboxUI(); dbxScroll();
       toast('Mock Dropbox connected — preview mode');
       return;
     }
@@ -740,7 +731,7 @@
       dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000;
       dbx.autoSync = true; dbx.autoUpload = true; dbxSave();
       await dropboxFetchAccount();
-      updateDropboxUI(); setDbxDropdownOpen(false); dbxScroll();
+      updateDropboxUI(); dbxScroll();
       toast('Dropbox connected');
       dropboxCheckForUpdates();
     }catch(err){ toast('Dropbox connection failed: ' + err.message); updateDropboxUI(); }
@@ -906,11 +897,6 @@
     reader.readAsText(file);
   }
 
-  function setDbxDropdownOpen(open){
-    document.querySelector('.sync-panel').classList.toggle('closed', !open);
-    document.getElementById('dbxSectionToggle').setAttribute('aria-expanded', open);
-  }
-
   function updateDropboxUI(){
     const setup = document.getElementById('dbx-setup'), connected = document.getElementById('dbx-connected'),
           st = document.getElementById('dbx-status');
@@ -919,7 +905,6 @@
     const isConnected = !!dbx.accessToken;
     setup.style.display = isConnected ? 'none' : 'block';
     connected.style.display = isConnected ? 'block' : 'none';
-    if(!isConnected) setDbxDropdownOpen(true);
     document.getElementById('dbx-account').textContent = dbx.account ? ' as ' + dbx.account : '';
     document.getElementById('dbx-lastsync').textContent = dbx.lastSync ? 'last synced ' + dbx.lastSync : 'never synced';
     const autoUp = document.getElementById('dbx-auto-upload'), autoSy = document.getElementById('dbx-auto-sync');
@@ -930,10 +915,6 @@
   }
 
   document.getElementById('dbx-connect').addEventListener('click', dropboxConnect);
-  document.getElementById('dbxSectionToggle').addEventListener('click', () => {
-    const panel = document.querySelector('.sync-panel');
-    setDbxDropdownOpen(panel.classList.contains('closed'));
-  });
   document.getElementById('dbx-upload').addEventListener('click', () => dropboxUpload(false));
   document.getElementById('dbx-download').addEventListener('click', () => dropboxDownload(false));
   document.getElementById('dbx-disconnect').addEventListener('click', dropboxDisconnect);
