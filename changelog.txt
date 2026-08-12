@@ -13,6 +13,7 @@ Version 1.1.0
 - Add local JSON/CSV export and import
 - Add dark mode
 - Add renewal reminders via browser notifications
+- Move Dropbox sync, backup and reminders into a settings page
 
 Version 1.0.0
 - Initial release
