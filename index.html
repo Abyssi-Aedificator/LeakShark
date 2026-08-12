@@ -721,7 +721,7 @@
       const remoteAt = Date.parse(j.server_modified || '');
       if(!remoteAt) return;
       if(remoteAt > (dbx.lastSyncAt || 0) + 5000 && remoteAt !== _dbxHintedAt){
-        if(dbx.autoSync) dropboxDownload(true);
+        if(dbx.autoSync) dropboxDownload(!dbx.lastSyncAt && subs.length > 0);
         else { _dbxHintedAt = remoteAt; toast('Newer backup on Dropbox — tap Download to sync'); }
       }
     }catch(e){}
