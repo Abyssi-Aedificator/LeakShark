@@ -684,6 +684,7 @@
       const d = parseBackupJSON(await res.text());
       if(!skipConfirm && !confirm('Restore from Dropbox? It will replace all current subscriptions.')) return;
       applyRestoredData(d);
+      dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); _dbxHintedAt = 0; dbxSave(); updateDropboxUI();
       toast('Restored from Dropbox');
     }catch(err){ toast(err.message); }
   }
