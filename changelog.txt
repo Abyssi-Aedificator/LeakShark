@@ -15,6 +15,7 @@ Version 1.1.0
 - Add renewal reminders via browser notifications
 - Move Dropbox sync, backup and reminders into a settings page
 - Always expand Dropbox sync settings
+- Hide the settings button while on the settings page
 
 Version 1.0.0
 - Initial release
