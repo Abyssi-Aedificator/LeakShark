@@ -246,6 +246,9 @@
   .sync-panel .form-toggle{padding:0}
   .sync-panel .form-toggle .chevron{transform:rotate(0)}
   .sync-panel:not(.closed) .form-toggle .chevron{transform:rotate(180deg)}
+  .settings-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .settings-head h2{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+  .settings-page section{border:1px solid var(--line);padding:28px}
   .dbx-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   #toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
@@ -267,9 +270,10 @@
 <div class="wrap">
   <header>
     <h1><img src="icon.svg" alt="LeakShark" class="logo">LeakShark</h1>
-    <button type="button" class="theme-toggle" id="themeToggle">Dark</button>
+    <button type="button" class="theme-toggle" id="settingsToggle">Settings</button>
   </header>
 
+  <div id="mainPage">
   <div class="bento">
     <div class="tile t-hero">
       <span class="t-label">Monthly total</span>
@@ -341,6 +345,20 @@
     <h2>Inactive</h2>
     <ul id="inactiveList"></ul>
   </section>
+  </div>
+
+  <div id="settingsPage" class="settings-page" style="display:none">
+    <div class="settings-head">
+      <h2>Settings</h2>
+      <button type="button" class="btn btn-ghost" id="settingsBack">&#8592; Back</button>
+    </div>
+    <section>
+      <h2>Appearance</h2>
+      <label class="dbx-toggle">
+        <input type="checkbox" id="themeToggle">
+        <span>Dark mode</span>
+      </label>
+    </section>
 
   <section class="sync-panel closed">
     <button type="button" class="form-toggle" id="dbxSectionToggle" aria-expanded="false">
@@ -400,6 +418,7 @@
     </label>
     <p class="dbx-meta" id="reminders-status"></p>
   </section>
+  </div>
 
   <footer>localStorage · Dropbox sync · v1.1.0</footer>
 </div>
@@ -412,19 +431,19 @@
   const THEME_KEY = 'leakshark.theme';
   const MONTHLY_WEEKS = 4.345;
 
+  const themeToggle = document.getElementById('themeToggle');
   function applyTheme(t){
     const dark = t === 'dark';
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    const b = document.getElementById('themeToggle');
-    if(b) b.textContent = dark ? 'Light' : 'Dark';
+    if(themeToggle) themeToggle.checked = dark;
   }
   let theme = localStorage.getItem(THEME_KEY);
   if(theme !== 'dark' && theme !== 'light'){
     theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
   applyTheme(theme);
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    theme = theme === 'dark' ? 'light' : 'dark';
+  themeToggle.addEventListener('change', () => {
+    theme = themeToggle.checked ? 'dark' : 'light';
     localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
     toast(theme === 'dark' ? 'Dark mode on' : 'Light mode on');
@@ -985,6 +1004,17 @@
   checkRenewals(); remindersStatus();
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkRenewals(); });
   setInterval(checkRenewals, 6 * 60 * 60 * 1000);
+
+  const mainPage = document.getElementById('mainPage');
+  const settingsPage = document.getElementById('settingsPage');
+  function showSettings(on){
+    mainPage.style.display = on ? 'none' : '';
+    settingsPage.style.display = on ? '' : 'none';
+    window.scrollTo(0, 0);
+    if(!on) render();
+  }
+  document.getElementById('settingsToggle').addEventListener('click', () => showSettings(true));
+  document.getElementById('settingsBack').addEventListener('click', () => showSettings(false));
 
   if(advanceRenewals()) save();
   render();
