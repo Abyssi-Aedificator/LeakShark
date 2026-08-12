@@ -480,7 +480,7 @@
     document.getElementById('name').value = s.name;
     document.getElementById('cost').value = s.cost;
     document.getElementById('cycle').value = s.cycle;
-    document.getElementById('renewal').value = s.renewal;
+    document.getElementById('renewal').value = s.renewal || '';
     document.getElementById('cancel').value = s.cancel || '';
     formTitle.textContent = 'Edit: ' + s.name;
     saveBtn.textContent = 'Update';
