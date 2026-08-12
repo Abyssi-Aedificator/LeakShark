@@ -396,6 +396,16 @@
     </div>
   </section>
 
+  <section>
+    <h2>Reminders</h2>
+    <p class="desc">Get a browser notification when a subscription is about to renew.</p>
+    <label class="dbx-toggle">
+      <input type="checkbox" id="reminders-toggle">
+      <span>Notify me 3 days before a renewal</span>
+    </label>
+    <p class="dbx-meta" id="reminders-status"></p>
+  </section>
+
   <footer>localStorage · Dropbox sync · v1.1.0</footer>
 </div>
 
@@ -951,6 +961,55 @@
       dropboxUpload(true);
     }
   });
+
+  const REMINDER_KEY = 'leakshark.reminders';
+  const NOTIFIED_KEY = 'leakshark.notified';
+  const REMIND_DAYS = 3;
+  const remindersToggle = document.getElementById('reminders-toggle');
+  remindersToggle.checked = localStorage.getItem(REMINDER_KEY) === '1';
+  let notified = {};
+  try{ notified = JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {}; }catch(e){}
+
+  function remindersStatus(){
+    const el = document.getElementById('reminders-status');
+    if(!remindersToggle.checked){ el.textContent = ''; return; }
+    if(!('Notification' in window)){ el.textContent = 'Notifications are not supported in this browser.'; return; }
+    el.textContent = Notification.permission === 'granted'
+      ? 'Notifications on.'
+      : 'Notifications blocked — allow them in your browser settings.';
+  }
+  function setReminders(on){
+    localStorage.setItem(REMINDER_KEY, on ? '1' : '0');
+    if(on && 'Notification' in window && Notification.permission === 'default'){
+      Notification.requestPermission().then(per => {
+        if(per !== 'granted'){ localStorage.setItem(REMINDER_KEY, '0'); remindersToggle.checked = false; }
+        remindersStatus(); checkRenewals();
+      });
+    } else {
+      remindersStatus(); checkRenewals();
+    }
+    toast(on ? 'Reminders enabled' : 'Reminders disabled');
+  }
+  remindersToggle.addEventListener('change', e => setReminders(e.target.checked));
+
+  function checkRenewals(){
+    if(!remindersToggle.checked) return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    subs.filter(isActive).forEach(s => {
+      if(!s.renewal) return;
+      const n = daysFromToday(s.renewal);
+      if(n < 0 || n > REMIND_DAYS) return;
+      if(notified[s.id] === s.renewal) return;
+      notified[s.id] = s.renewal;
+      localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+      const body = cap(s.cycle) + ' · ' + money(s.cost) + (n === 0 ? ' · renews today' : ' · renews in ' + n + ' day' + (n === 1 ? '' : 's'));
+      try{ new Notification('LeakShark — ' + s.name + ' renewing soon', { body: body, icon: 'icon-192.png' }); }catch(e){}
+    });
+  }
+
+  checkRenewals(); remindersStatus();
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkRenewals(); });
+  setInterval(checkRenewals, 6 * 60 * 60 * 1000);
 
   if(advanceRenewals()) save();
   render();
