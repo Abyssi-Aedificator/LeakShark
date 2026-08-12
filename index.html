@@ -337,11 +337,6 @@
     <ul id="activeList"></ul>
   </section>
 
-  <section id="radarSection" class="radar" style="display:none">
-    <h2>Renewing soon</h2>
-    <ul id="radarList"></ul>
-  </section>
-
   <section>
     <h2>Inactive</h2>
     <ul id="inactiveList"></ul>
@@ -541,25 +536,6 @@
 
     renderList(activeListEl, active, 'No active subscriptions.');
     renderList(inactiveListEl, inactive, 'No inactive subscriptions.', true);
-    renderRadar(active);
-  }
-
-  function radarLabel(d){
-    const n = daysFromToday(d);
-    if(n === 0) return 'renews today';
-    if(n === 1) return 'renews in 1 day';
-    return 'renews in ' + n + ' days';
-  }
-  function renderRadar(active){
-    const section = document.getElementById('radarSection');
-    const listEl = document.getElementById('radarList');
-    const due = active.filter(s => { const n = daysFromToday(s.renewal); return n >= 0 && n <= 30; }).slice(0, 5);
-    section.style.display = due.length ? '' : 'none';
-    listEl.innerHTML = '';
-    due.forEach((s, i) => {
-      const meta = cap(s.cycle) + ' · ' + radarLabel(s.renewal) + ' · ' + fmtDate(s.renewal);
-      listEl.insertAdjacentHTML('beforeend', rowHTML(s, i, meta, ''));
-    });
   }
 
   function renderList(listEl, items, emptyText, inactive){
@@ -661,7 +637,6 @@
   }
   activeListEl.addEventListener('click', handleRowClick);
   inactiveListEl.addEventListener('click', handleRowClick);
-  document.getElementById('radarList').addEventListener('click', handleRowClick);
 
   /* ---------- Dropbox sync (client-side OAuth2 PKCE, no backend) ---------- */
   const DBX_KEY = 'leakshark.dropbox';
