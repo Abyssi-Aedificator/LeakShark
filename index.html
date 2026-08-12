@@ -21,19 +21,19 @@
     --line:#e3e1da;
     --accent:#e63946;
     --accent-ink:#fff;
+    --hover:#f3f1ea;
+    --placeholder:#c9c7bf;
   }
   html[data-theme="dark"]{
-    --bg:#111111;
-    --ink:#faf9f6;
-    --muted:#9a978f;
-    --line:#2a2a28;
+    --bg:#050609;
+    --ink:#eeeeee;
+    --muted:#949599;
+    --line:#1c1e25;
+    --accent:#19c6b9;
+    --accent-ink:#000000;
+    --hover:#0c0e15;
+    --placeholder:#363840;
   }
-  html[data-theme="dark"] .item:hover{background:#1c1c1a}
-  html[data-theme="dark"] input::placeholder{color:#4d4b47}
-  html[data-theme="dark"] .t-hero{color:var(--bg)}
-  html[data-theme="dark"] .t-hero .num{color:var(--bg)}
-  html[data-theme="dark"] .t-hero .t-label,html[data-theme="dark"] .t-hero .num small{color:rgba(17,17,17,.6)}
-  html[data-theme="dark"] .btn:hover{color:var(--accent-ink)}
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -103,9 +103,8 @@
   .tile .num{font-size:34px;font-weight:800;letter-spacing:-1px}
   .tile .num small{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px}
   .t-hero{grid-column:span 2;grid-row:span 2;background:var(--ink);color:var(--bg)}
-  .t-hero .t-label{color:rgba(250,249,246,.6)}
-  .t-hero .num{font-size:56px;color:#fff}
-  .t-hero .num small{color:rgba(250,249,246,.6)}
+  .t-hero .t-label,.t-hero .num small{color:var(--bg);opacity:.6}
+  .t-hero .num{font-size:56px;color:var(--bg)}
 
   section h2{
     font-size:12px;
@@ -168,7 +167,7 @@
     transition:border-color .2s;
   }
   input:focus,select:focus{border-color:var(--ink)}
-  input::placeholder{color:#c9c7bf}
+  input::placeholder{color:var(--placeholder)}
   .form-actions{display:flex;gap:12px;margin-top:24px}
   .btn{
     border:1px solid var(--ink);
@@ -198,7 +197,7 @@
     border-bottom:1px solid var(--line);
     transition:background .15s;
   }
-  .item:hover{background:#f3f1ea}
+  .item:hover{background:var(--hover)}
   .item .index{font-size:12px;font-weight:700;color:var(--muted);width:24px}
   .item .name{font-size:16px;font-weight:700;overflow-wrap:anywhere}
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
