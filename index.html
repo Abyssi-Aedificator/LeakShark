@@ -682,7 +682,12 @@
       const res = await fetch('https://content.dropboxapi.com/2/files/download', {method:'POST',
         headers:{'Authorization':'Bearer ' + dbx.accessToken,
           'Dropbox-API-Arg':JSON.stringify({path:'/leakshark-backup.json'})}});
-      if(res.status === 409){ toast('No backup found in Dropbox yet — upload one first'); return; }
+      if(res.status === 409){
+        const j = await res.json().catch(() => ({}));
+        const tag = j && j.error && j.error['.tag'];
+        if(tag === 'not_found'){ toast('No backup found in Dropbox yet — upload one first'); return; }
+        throw new Error('download failed (409)');
+      }
       if(!res.ok) throw new Error('download failed (' + res.status + ')');
       const d = parseBackupJSON(await res.text());
       if(!skipConfirm && !confirm('Restore from Dropbox? It will replace all current subscriptions.')) return;
