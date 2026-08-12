@@ -22,6 +22,18 @@
     --accent:#e63946;
     --accent-ink:#fff;
   }
+  html[data-theme="dark"]{
+    --bg:#111111;
+    --ink:#faf9f6;
+    --muted:#9a978f;
+    --line:#2a2a28;
+  }
+  html[data-theme="dark"] .item:hover{background:#1c1c1a}
+  html[data-theme="dark"] input::placeholder{color:#4d4b47}
+  html[data-theme="dark"] .t-hero{color:var(--bg)}
+  html[data-theme="dark"] .t-hero .num{color:var(--bg)}
+  html[data-theme="dark"] .t-hero .t-label,html[data-theme="dark"] .t-hero .num small{color:rgba(17,17,17,.6)}
+  html[data-theme="dark"] .btn{color:var(--bg)}
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -49,6 +61,20 @@
     vertical-align:-6px;
     margin-right:10px;
   }
+  .theme-toggle{
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:8px 16px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .theme-toggle:hover{border-color:var(--ink)}
 
   .bento{
     display:grid;
@@ -241,6 +267,7 @@
 <div class="wrap">
   <header>
     <h1><img src="icon.svg" alt="LeakShark" class="logo">LeakShark</h1>
+    <button type="button" class="theme-toggle" id="themeToggle">Dark</button>
   </header>
 
   <div class="bento">
@@ -377,7 +404,27 @@
 <script>
 (function(){
   const KEY = 'subman_bento';
+  const THEME_KEY = 'leakshark.theme';
   const MONTHLY_WEEKS = 4.345;
+
+  function applyTheme(t){
+    const dark = t === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    const b = document.getElementById('themeToggle');
+    if(b) b.textContent = dark ? 'Light' : 'Dark';
+  }
+  let theme = localStorage.getItem(THEME_KEY);
+  if(theme !== 'dark' && theme !== 'light'){
+    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  applyTheme(theme);
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
+    toast(theme === 'dark' ? 'Dark mode on' : 'Light mode on');
+  });
+
   let subs = load();
   let editingId = null;
 
