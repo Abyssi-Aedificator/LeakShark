@@ -988,9 +988,11 @@
 
   const mainPage = document.getElementById('mainPage');
   const settingsPage = document.getElementById('settingsPage');
+  const settingsToggle = document.getElementById('settingsToggle');
   function showSettings(on){
     mainPage.style.display = on ? 'none' : '';
     settingsPage.style.display = on ? '' : 'none';
+    settingsToggle.style.display = on ? 'none' : '';
     window.scrollTo(0, 0);
     if(!on) render();
   }
