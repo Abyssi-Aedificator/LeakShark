@@ -31,7 +31,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(req).then((cached) => {
       const network = fetch(req)
         .then((res) => {
-          if (res.ok && res.type === 'basic' || res.type === 'cors') {
+          if (res.ok && (res.type === 'basic' || res.type === 'cors')) {
             const clone = res.clone();
             caches.open(CACHE).then((cache) => cache.put(req, clone));
           }
