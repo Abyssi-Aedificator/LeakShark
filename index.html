@@ -634,7 +634,7 @@
     if(dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
     if(!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
     try{
-      const res = await fetch('https://api.dropboxapi.com/oauth2/token', {method:'POST',
+      const res = await fetch('https://api.dropboxapi.com/oauth2/token', {method:'POST', keepalive:true,
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:new URLSearchParams({grant_type:'refresh_token', refresh_token:dbx.refreshToken, client_id:dbx.appKey})});
       if(!res) return false;
@@ -664,7 +664,7 @@
     if(silent && snapshot === _lastUploadedState) return;
     const payload = {app:'LeakShark', version:1, exportedAt:new Date().toISOString(), data:subs};
     try{
-      const res = await fetch('https://content.dropboxapi.com/2/files/upload', {method:'POST',
+      const res = await fetch('https://content.dropboxapi.com/2/files/upload', {method:'POST', keepalive:true,
         headers:{'Authorization':'Bearer ' + dbx.accessToken, 'Content-Type':'application/octet-stream',
           'Dropbox-API-Arg':JSON.stringify({path:'/leakshark-backup.json', mode:'overwrite', mute:true})},
         body:JSON.stringify(payload, null, 2)});
@@ -780,6 +780,13 @@
   document.getElementById('dbx-disconnect').addEventListener('click', dropboxDisconnect);
   document.getElementById('dbx-auto-upload').addEventListener('change', e => dropboxSetAutoUpload(e.target.checked));
   document.getElementById('dbx-auto-sync').addEventListener('change', e => dropboxSetAutoSync(e.target.checked));
+
+  window.addEventListener('pagehide', () => {
+    if(_syncTimer && dbx.accessToken && dbx.autoUpload){
+      clearTimeout(_syncTimer); _syncTimer = null;
+      dropboxUpload(true);
+    }
+  });
 
   render();
   updateDropboxUI(); dropboxHandleRedirect(); dropboxCheckForUpdates();
