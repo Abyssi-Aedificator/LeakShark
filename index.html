@@ -420,6 +420,36 @@
 
   function renewTime(d){ if(!d) return Infinity; const t = Date.parse(d + 'T00:00:00'); return isNaN(t) ? Infinity : t; }
 
+  function fmtYMD(d){
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function addCycle(dateStr, cycle){
+    const d = new Date(dateStr + 'T00:00:00');
+    if(cycle === 'weekly') d.setDate(d.getDate() + 7);
+    else if(cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
+    else{
+      const day = d.getDate();
+      d.setMonth(d.getMonth() + 1);
+      if(d.getDate() < day) d.setDate(0);
+    }
+    return fmtYMD(d);
+  }
+  function advanceRenewals(){
+    let changed = false;
+    const today = fmtYMD(new Date());
+    subs.forEach(s => {
+      if(!isActive(s) || !s.renewal) return;
+      if(isNaN(Date.parse(s.renewal + 'T00:00:00'))) return;
+      let guard = 0;
+      while(s.renewal && s.renewal <= today && s.renewal !== s.lastAdvance && guard++ < 24){
+        s.lastAdvance = s.renewal;
+        s.renewal = addCycle(s.renewal, s.cycle || 'monthly');
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
   function render(){
     const active = subs.filter(isActive).sort((a, b) => renewTime(a.renewal) - renewTime(b.renewal));
     const inactive = subs.filter(s => !isActive(s)).sort((a, b) => a.name.localeCompare(b.name));
@@ -508,10 +538,10 @@
     if(!d.name){ document.getElementById('name').focus(); return; }
     if(editingId){
       const s = subs.find(x => x.id === editingId);
-      if(s){ Object.assign(s, d); }
+      if(s){ Object.assign(s, d); s.lastAdvance = ''; }
       cancelEdit();
     } else {
-      subs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), ...d });
+      subs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), lastAdvance:'', ...d });
       clearForm();
     }
     save();
@@ -743,6 +773,7 @@
   }
   function applyRestoredData(d){
     subs = d;
+    advanceRenewals();
     _lastUploadedState = JSON.stringify(subs); _skipAutoUpload = true;
     save(); render();
   }
@@ -788,6 +819,7 @@
     }
   });
 
+  if(advanceRenewals()) save();
   render();
   updateDropboxUI(); dropboxHandleRedirect(); dropboxCheckForUpdates();
 })();
