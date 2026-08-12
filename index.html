@@ -669,7 +669,7 @@
           'Dropbox-API-Arg':JSON.stringify({path:'/leakshark-backup.json', mode:'overwrite', mute:true})},
         body:JSON.stringify(payload, null, 2)});
       if(!res.ok) throw new Error('upload failed (' + res.status + ')');
-      _lastUploadedState = snapshot;
+      _lastUploadedState = snapshot; _dbxHintedAt = 0;
       dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
       toast(silent ? 'Auto-synced to Dropbox' : 'Uploaded to Dropbox');
     }catch(err){ toast(err.message); }
@@ -696,7 +696,7 @@
     if(!confirm('Disconnect Dropbox? You can reconnect any time with your App key.')) return;
     clearTimeout(_syncTimer);
     dbx = {appKey: dbx.appKey, accessToken:'', refreshToken:'', expiresAt:0, account:'', lastSync:'', lastSyncAt:0, autoSync:false, autoUpload:false};
-    dbxSave(); _skipAutoUpload = false; _lastUploadedState = '';
+    dbxSave(); _skipAutoUpload = false; _lastUploadedState = ''; _dbxHintedAt = 0;
     updateDropboxUI();
     toast('Dropbox disconnected');
   }
