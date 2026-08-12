@@ -16,6 +16,7 @@ Version 1.1.0
 - Move Dropbox sync, backup and reminders into a settings page
 - Always expand Dropbox sync settings
 - Hide the settings button while on the settings page
+- Fix dark theme colors by inverting the light palette
 
 Version 1.0.0
 - Initial release
