@@ -10,7 +10,6 @@ Version 1.1.0
 - Fix service worker caching failed responses
 - Fix pending auto-upload being dropped on close
 - Auto-advance renewal dates by billing cycle
-- Add upcoming renewals radar
 - Add local JSON/CSV export and import
 - Add dark mode
 - Add renewal reminders via browser notifications
