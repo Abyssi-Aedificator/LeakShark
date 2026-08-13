@@ -39,5 +39,6 @@ Single-file vanilla web app (no build, no packages, no tests). All markup, CSS, 
 - After finishing each feature: update `changelog.txt`, commit, then update `AGENTS.md` if needed.
 - Each bug fix or feature change must be a separate, individual commit.
 - **Never create a separate "bump service worker version" commit.** Fold the `sw.js` `VERSION` bump into the same commit as the feature/fix that changed the HTML/CSS/JS.
+- **Never commit only `changelog.txt`.** Include the changelog update in the same commit as the feature/fix it describes.
 - Never include version numbers in commit descriptions.
 - Do not push to origin unless explicitly asked.
