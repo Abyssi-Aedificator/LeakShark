@@ -17,6 +17,7 @@ Version 1.1.0
 - Always expand Dropbox sync settings
 - Hide the settings button while on the settings page
 - Fix dark theme colors by inverting the light palette
+- Show days until the next renewal next to each subscription
 
 Version 1.0.0
 - Initial release

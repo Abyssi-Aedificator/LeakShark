@@ -198,7 +198,7 @@
     transition:background .15s;
   }
   .item:hover{background:var(--hover)}
-  .item .index{font-size:12px;font-weight:700;color:var(--muted);width:24px}
+  .item .index{font-size:12px;font-weight:700;color:var(--muted);min-width:24px;font-variant-numeric:tabular-nums}
   .item .name{font-size:16px;font-weight:700;overflow-wrap:anywhere}
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
   .item .price{font-size:16px;font-weight:700;text-align:right;white-space:nowrap}
@@ -483,9 +483,9 @@
   function cap(v){ return v.charAt(0).toUpperCase() + v.slice(1); }
   function isActive(s){ return !s.cancel || daysFromToday(s.cancel) >= 0; }
 
-  function rowHTML(s, i, meta, extraClass){
+  function rowHTML(s, days, meta, extraClass){
     return '<li class="item' + (extraClass || '') + '">' +
-      '<span class="index">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="index">' + days + '</span>' +
       '<span class="nm"><span class="name">' + esc(s.name) + '</span>' +
         '<div class="meta">' + meta + '</div></span>' +
       '<span class="price">' + money(s.cost) + '</span>' +
@@ -556,11 +556,16 @@
       listEl.appendChild(li);
       return;
     }
-    items.forEach((s, i) => {
+    items.forEach(s => {
       const meta = inactive
         ? cap(s.cycle) + ' · canceled ' + fmtDate(s.cancel) + ' · ' + esc(cancelStatus(s.cancel))
         : cap(s.cycle) + ' · renews ' + fmtDate(s.renewal) + (s.cancel ? ' · cancels ' + fmtDate(s.cancel) : '');
-      listEl.insertAdjacentHTML('beforeend', rowHTML(s, i, meta, inactive ? ' is-canceled' : ''));
+      let days = '';
+      if(!inactive){
+        const n = daysFromToday(s.renewal);
+        days = isNaN(n) ? '—' : n;
+      }
+      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : ''));
     });
   }
 
