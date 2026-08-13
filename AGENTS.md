@@ -31,5 +31,14 @@ Single-file vanilla web app (no build, no packages, no tests). All markup, CSS, 
 
 ## Conventions
 
-- Changelog format: `Version X.Y.Z` followed by `- bullet` lines (see `changelog.txt`).
+- Changelog format: `Version X.Y.Z` followed by `- bullet` lines (see `changelog.txt`). Changelog stays minimal: existing features are already part of their shipped version, so only new post-1.0.0 work gets a bullet.
 - Branding is **LeakShark** (title, header, manifest, README). Icon: shark fin + drips.
+
+## Workflow
+
+- After finishing each feature: update `changelog.txt`, commit, then update `AGENTS.md` if needed.
+- Each bug fix or feature change must be a separate, individual commit.
+- **Never create a separate "bump service worker version" commit.** Fold the `sw.js` `VERSION` bump into the same commit as the feature/fix that changed the HTML/CSS/JS.
+- **Never commit only `changelog.txt`.** Include the changelog update in the same commit as the feature/fix it describes.
+- Never include version numbers in commit descriptions.
+- Do not push to origin unless explicitly asked.

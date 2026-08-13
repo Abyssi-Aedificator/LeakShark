@@ -1,2 +1,23 @@
+Version 1.1.0
+- Sort active subscriptions by next renewal date, inactive alphabetically
+- Fix auto-sync re-downloading and overwriting local edits
+- Fix silent overwrite of local data on first sync
+- Fix unhandled errors when offline during Dropbox sync
+- Fix stale newer-backup hint after reconnect
+- Fix subscription order when a renewal date is invalid
+- Fix edit form showing undefined as a renewal date
+- Fix misleading no-backup message on download errors
+- Fix service worker caching failed responses
+- Fix pending auto-upload being dropped on close
+- Auto-advance renewal dates by billing cycle
+- Add local JSON/CSV export and import
+- Add dark mode
+- Add renewal reminders via browser notifications
+- Move Dropbox sync, backup and reminders into a settings page
+- Always expand Dropbox sync settings
+- Hide the settings button while on the settings page
+- Fix dark theme colors by inverting the light palette
+- Show days until the next renewal next to each subscription
+
 Version 1.0.0
 - Initial release

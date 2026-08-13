@@ -21,6 +21,18 @@
     --line:#e3e1da;
     --accent:#e63946;
     --accent-ink:#fff;
+    --hover:#f3f1ea;
+    --placeholder:#c9c7bf;
+  }
+  html[data-theme="dark"]{
+    --bg:#050609;
+    --ink:#eeeeee;
+    --muted:#949599;
+    --line:#1c1e25;
+    --accent:#e63946;
+    --accent-ink:#ffffff;
+    --hover:#0c0e15;
+    --placeholder:#363840;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{
@@ -49,6 +61,20 @@
     vertical-align:-6px;
     margin-right:10px;
   }
+  .theme-toggle{
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:8px 16px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .theme-toggle:hover{border-color:var(--ink)}
 
   .bento{
     display:grid;
@@ -77,9 +103,8 @@
   .tile .num{font-size:34px;font-weight:800;letter-spacing:-1px}
   .tile .num small{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px}
   .t-hero{grid-column:span 2;grid-row:span 2;background:var(--ink);color:var(--bg)}
-  .t-hero .t-label{color:rgba(250,249,246,.6)}
-  .t-hero .num{font-size:56px;color:#fff}
-  .t-hero .num small{color:rgba(250,249,246,.6)}
+  .t-hero .t-label,.t-hero .num small{color:var(--bg);opacity:.6}
+  .t-hero .num{font-size:56px;color:var(--bg)}
 
   section h2{
     font-size:12px;
@@ -142,7 +167,7 @@
     transition:border-color .2s;
   }
   input:focus,select:focus{border-color:var(--ink)}
-  input::placeholder{color:#c9c7bf}
+  input::placeholder{color:var(--placeholder)}
   .form-actions{display:flex;gap:12px;margin-top:24px}
   .btn{
     border:1px solid var(--ink);
@@ -172,8 +197,8 @@
     border-bottom:1px solid var(--line);
     transition:background .15s;
   }
-  .item:hover{background:#f3f1ea}
-  .item .index{font-size:12px;font-weight:700;color:var(--muted);width:24px}
+  .item:hover{background:var(--hover)}
+  .item .index{font-size:12px;font-weight:700;color:var(--muted);min-width:24px;font-variant-numeric:tabular-nums}
   .item .name{font-size:16px;font-weight:700;overflow-wrap:anywhere}
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
   .item .price{font-size:16px;font-weight:700;text-align:right;white-space:nowrap}
@@ -206,8 +231,7 @@
     border:1px solid var(--line);
     padding:28px;
   }
-  .sync-panel .sync-body{margin-top:16px}
-  .sync-panel .desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+  .desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
   .sync-status{font-size:11px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:20px;white-space:nowrap}
   .sync-status.on{background:rgba(62,207,142,.15);color:#2e9e6b}
   .sync-status.off{background:rgba(107,106,102,.14);color:var(--muted)}
@@ -215,11 +239,9 @@
   .dbx-meta{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
   .dbx-toggle{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink);margin-bottom:10px;cursor:pointer;user-select:none}
   .dbx-toggle input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
-  .sync-panel.closed .sync-body{display:none}
-  .dbx-head-right{display:flex;align-items:center;gap:12px}
-  .sync-panel .form-toggle{padding:0}
-  .sync-panel .form-toggle .chevron{transform:rotate(0)}
-  .sync-panel:not(.closed) .form-toggle .chevron{transform:rotate(180deg)}
+  .settings-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .settings-head h2{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+  .settings-page section{border:1px solid var(--line);padding:28px}
   .dbx-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   #toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
@@ -241,8 +263,10 @@
 <div class="wrap">
   <header>
     <h1><img src="icon.svg" alt="LeakShark" class="logo">LeakShark</h1>
+    <button type="button" class="theme-toggle" id="settingsToggle">Settings</button>
   </header>
 
+  <div id="mainPage">
   <div class="bento">
     <div class="tile t-hero">
       <span class="t-label">Monthly total</span>
@@ -314,15 +338,26 @@
     <h2>Inactive</h2>
     <ul id="inactiveList"></ul>
   </section>
+  </div>
 
-  <section class="sync-panel closed">
-    <button type="button" class="form-toggle" id="dbxSectionToggle" aria-expanded="false">
-      <span>Dropbox sync</span>
-      <span class="dbx-head-right">
-        <span id="dbx-status" class="sync-status off">Not connected</span>
-        <span class="chevron">&#8595;</span>
-      </span>
-    </button>
+  <div id="settingsPage" class="settings-page" style="display:none">
+    <div class="settings-head">
+      <h2>Settings</h2>
+      <button type="button" class="btn btn-ghost" id="settingsBack">&#8592; Back</button>
+    </div>
+    <section>
+      <h2>Appearance</h2>
+      <label class="dbx-toggle">
+        <input type="checkbox" id="themeToggle">
+        <span>Dark mode</span>
+      </label>
+    </section>
+
+  <section class="sync-panel">
+    <div class="settings-head">
+      <h2>Dropbox sync</h2>
+      <span id="dbx-status" class="sync-status off">Not connected</span>
+    </div>
     <div class="sync-body">
       <p class="desc">Sync your subscriptions through your own Dropbox account so the same data is available on your PC and your phone. Your data goes straight from your browser to your Dropbox — never through any server of ours.</p>
       <div id="dbx-setup">
@@ -353,7 +388,29 @@
     </div>
   </section>
 
-  <footer>localStorage · Dropbox sync · v1.0.0</footer>
+  <section>
+    <h2>Backup &amp; restore</h2>
+    <p class="desc">Export your subscriptions to a file you keep anywhere — or bring them back from a backup.</p>
+    <div class="dbx-actions">
+      <button class="btn" id="export-json">Export JSON</button>
+      <button class="btn btn-ghost" id="export-csv">Export CSV</button>
+      <button class="btn btn-ghost" id="import-btn">Import JSON</button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+    </div>
+  </section>
+
+  <section>
+    <h2>Reminders</h2>
+    <p class="desc">Get a browser notification when a subscription is about to renew.</p>
+    <label class="dbx-toggle">
+      <input type="checkbox" id="reminders-toggle">
+      <span>Notify me 3 days before a renewal</span>
+    </label>
+    <p class="dbx-meta" id="reminders-status"></p>
+  </section>
+  </div>
+
+  <footer>localStorage · Dropbox sync · v1.1.0</footer>
 </div>
 
 <div id="toast"></div>
@@ -361,7 +418,27 @@
 <script>
 (function(){
   const KEY = 'subman_bento';
+  const THEME_KEY = 'leakshark.theme';
   const MONTHLY_WEEKS = 4.345;
+
+  const themeToggle = document.getElementById('themeToggle');
+  function applyTheme(t){
+    const dark = t === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if(themeToggle) themeToggle.checked = dark;
+  }
+  let theme = localStorage.getItem(THEME_KEY);
+  if(theme !== 'dark' && theme !== 'light'){
+    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  applyTheme(theme);
+  themeToggle.addEventListener('change', () => {
+    theme = themeToggle.checked ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
+    toast(theme === 'dark' ? 'Dark mode on' : 'Light mode on');
+  });
+
   let subs = load();
   let editingId = null;
 
@@ -406,9 +483,9 @@
   function cap(v){ return v.charAt(0).toUpperCase() + v.slice(1); }
   function isActive(s){ return !s.cancel || daysFromToday(s.cancel) >= 0; }
 
-  function rowHTML(s, i, meta, extraClass){
+  function rowHTML(s, days, meta, extraClass){
     return '<li class="item' + (extraClass || '') + '">' +
-      '<span class="index">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="index">' + days + '</span>' +
       '<span class="nm"><span class="name">' + esc(s.name) + '</span>' +
         '<div class="meta">' + meta + '</div></span>' +
       '<span class="price">' + money(s.cost) + '</span>' +
@@ -418,9 +495,41 @@
       '</span></li>';
   }
 
+  function renewTime(d){ if(!d) return Infinity; const t = Date.parse(d + 'T00:00:00'); return isNaN(t) ? Infinity : t; }
+
+  function fmtYMD(d){
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function addCycle(dateStr, cycle){
+    const d = new Date(dateStr + 'T00:00:00');
+    if(cycle === 'weekly') d.setDate(d.getDate() + 7);
+    else if(cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
+    else{
+      const day = d.getDate();
+      d.setMonth(d.getMonth() + 1);
+      if(d.getDate() < day) d.setDate(0);
+    }
+    return fmtYMD(d);
+  }
+  function advanceRenewals(){
+    let changed = false;
+    const today = fmtYMD(new Date());
+    subs.forEach(s => {
+      if(!isActive(s) || !s.renewal) return;
+      if(isNaN(Date.parse(s.renewal + 'T00:00:00'))) return;
+      let guard = 0;
+      while(s.renewal && s.renewal <= today && s.renewal !== s.lastAdvance && guard++ < 24){
+        s.lastAdvance = s.renewal;
+        s.renewal = addCycle(s.renewal, s.cycle || 'monthly');
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
   function render(){
-    const active = subs.filter(isActive);
-    const inactive = subs.filter(s => !isActive(s));
+    const active = subs.filter(isActive).sort((a, b) => renewTime(a.renewal) - renewTime(b.renewal));
+    const inactive = subs.filter(s => !isActive(s)).sort((a, b) => a.name.localeCompare(b.name));
     let total = 0, monthly = 0, yearly = 0;
     active.forEach(s => {
       total += toMonthly(s);
@@ -447,11 +556,16 @@
       listEl.appendChild(li);
       return;
     }
-    items.forEach((s, i) => {
+    items.forEach(s => {
       const meta = inactive
         ? cap(s.cycle) + ' · canceled ' + fmtDate(s.cancel) + ' · ' + esc(cancelStatus(s.cancel))
         : cap(s.cycle) + ' · renews ' + fmtDate(s.renewal) + (s.cancel ? ' · cancels ' + fmtDate(s.cancel) : '');
-      listEl.insertAdjacentHTML('beforeend', rowHTML(s, i, meta, inactive ? ' is-canceled' : ''));
+      let days = '';
+      if(!inactive){
+        const n = daysFromToday(s.renewal);
+        days = isNaN(n) ? '—' : n;
+      }
+      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : ''));
     });
   }
 
@@ -478,7 +592,7 @@
     document.getElementById('name').value = s.name;
     document.getElementById('cost').value = s.cost;
     document.getElementById('cycle').value = s.cycle;
-    document.getElementById('renewal').value = s.renewal;
+    document.getElementById('renewal').value = s.renewal || '';
     document.getElementById('cancel').value = s.cancel || '';
     formTitle.textContent = 'Edit: ' + s.name;
     saveBtn.textContent = 'Update';
@@ -506,10 +620,10 @@
     if(!d.name){ document.getElementById('name').focus(); return; }
     if(editingId){
       const s = subs.find(x => x.id === editingId);
-      if(s){ Object.assign(s, d); }
+      if(s){ Object.assign(s, d); s.lastAdvance = ''; }
       cancelEdit();
     } else {
-      subs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), ...d });
+      subs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), lastAdvance:'', ...d });
       clearForm();
     }
     save();
@@ -587,7 +701,7 @@
     if(!key){ toast('Enter your Dropbox App key first'); return; }
     if(key.toLowerCase() === 'mock'){
       dbx = {appKey:'mock',accessToken:'mock_token',refreshToken:'',expiresAt:Date.now()+864e5,account:'demo@example.com',lastSync:'just now',lastSyncAt:Date.now(),autoSync:true,autoUpload:true};
-      dbxSave(); updateDropboxUI(); setDbxDropdownOpen(false); dbxScroll();
+      dbxSave(); updateDropboxUI(); dbxScroll();
       toast('Mock Dropbox connected — preview mode');
       return;
     }
@@ -621,7 +735,7 @@
       dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000;
       dbx.autoSync = true; dbx.autoUpload = true; dbxSave();
       await dropboxFetchAccount();
-      updateDropboxUI(); setDbxDropdownOpen(false); dbxScroll();
+      updateDropboxUI(); dbxScroll();
       toast('Dropbox connected');
       dropboxCheckForUpdates();
     }catch(err){ toast('Dropbox connection failed: ' + err.message); updateDropboxUI(); }
@@ -631,13 +745,16 @@
     if(isMockDbx()) return true;
     if(dbx.accessToken && Date.now() < dbx.expiresAt - 30000) return true;
     if(!dbx.refreshToken || !dbx.appKey) return !!dbx.accessToken;
-    const res = await fetch('https://api.dropboxapi.com/oauth2/token', {method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({grant_type:'refresh_token', refresh_token:dbx.refreshToken, client_id:dbx.appKey})});
-    const j = await res.json();
-    if(!res.ok) return false;
-    dbx.accessToken = j.access_token; dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
-    return true;
+    try{
+      const res = await fetch('https://api.dropboxapi.com/oauth2/token', {method:'POST', keepalive:true,
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:new URLSearchParams({grant_type:'refresh_token', refresh_token:dbx.refreshToken, client_id:dbx.appKey})});
+      if(!res) return false;
+      const j = await res.json();
+      if(!res.ok) return false;
+      dbx.accessToken = j.access_token; dbx.expiresAt = Date.now() + (j.expires_in || 14400) * 1000; dbxSave();
+      return true;
+    }catch(e){ return false; }
   }
 
   async function dropboxFetchAccount(){
@@ -659,12 +776,12 @@
     if(silent && snapshot === _lastUploadedState) return;
     const payload = {app:'LeakShark', version:1, exportedAt:new Date().toISOString(), data:subs};
     try{
-      const res = await fetch('https://content.dropboxapi.com/2/files/upload', {method:'POST',
+      const res = await fetch('https://content.dropboxapi.com/2/files/upload', {method:'POST', keepalive:true,
         headers:{'Authorization':'Bearer ' + dbx.accessToken, 'Content-Type':'application/octet-stream',
           'Dropbox-API-Arg':JSON.stringify({path:'/leakshark-backup.json', mode:'overwrite', mute:true})},
         body:JSON.stringify(payload, null, 2)});
       if(!res.ok) throw new Error('upload failed (' + res.status + ')');
-      _lastUploadedState = snapshot;
+      _lastUploadedState = snapshot; _dbxHintedAt = 0;
       dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); dbxSave(); updateDropboxUI();
       toast(silent ? 'Auto-synced to Dropbox' : 'Uploaded to Dropbox');
     }catch(err){ toast(err.message); }
@@ -677,11 +794,17 @@
       const res = await fetch('https://content.dropboxapi.com/2/files/download', {method:'POST',
         headers:{'Authorization':'Bearer ' + dbx.accessToken,
           'Dropbox-API-Arg':JSON.stringify({path:'/leakshark-backup.json'})}});
-      if(res.status === 409){ toast('No backup found in Dropbox yet — upload one first'); return; }
+      if(res.status === 409){
+        const j = await res.json().catch(() => ({}));
+        const tag = j && j.error && j.error['.tag'];
+        if(tag === 'not_found'){ toast('No backup found in Dropbox yet — upload one first'); return; }
+        throw new Error('download failed (409)');
+      }
       if(!res.ok) throw new Error('download failed (' + res.status + ')');
       const d = parseBackupJSON(await res.text());
       if(!skipConfirm && !confirm('Restore from Dropbox? It will replace all current subscriptions.')) return;
       applyRestoredData(d);
+      dbx.lastSync = new Date().toLocaleString(); dbx.lastSyncAt = Date.now(); _dbxHintedAt = 0; dbxSave(); updateDropboxUI();
       toast('Restored from Dropbox');
     }catch(err){ toast(err.message); }
   }
@@ -690,7 +813,7 @@
     if(!confirm('Disconnect Dropbox? You can reconnect any time with your App key.')) return;
     clearTimeout(_syncTimer);
     dbx = {appKey: dbx.appKey, accessToken:'', refreshToken:'', expiresAt:0, account:'', lastSync:'', lastSyncAt:0, autoSync:false, autoUpload:false};
-    dbxSave(); _skipAutoUpload = false; _lastUploadedState = '';
+    dbxSave(); _skipAutoUpload = false; _lastUploadedState = ''; _dbxHintedAt = 0;
     updateDropboxUI();
     toast('Dropbox disconnected');
   }
@@ -718,7 +841,7 @@
       const remoteAt = Date.parse(j.server_modified || '');
       if(!remoteAt) return;
       if(remoteAt > (dbx.lastSyncAt || 0) + 5000 && remoteAt !== _dbxHintedAt){
-        if(dbx.autoSync) dropboxDownload(true);
+        if(dbx.autoSync) dropboxDownload(!dbx.lastSyncAt && subs.length > 0);
         else { _dbxHintedAt = remoteAt; toast('Newer backup on Dropbox — tap Download to sync'); }
       }
     }catch(e){}
@@ -732,13 +855,50 @@
   }
   function applyRestoredData(d){
     subs = d;
+    advanceRenewals();
     _lastUploadedState = JSON.stringify(subs); _skipAutoUpload = true;
     save(); render();
   }
 
-  function setDbxDropdownOpen(open){
-    document.querySelector('.sync-panel').classList.toggle('closed', !open);
-    document.getElementById('dbxSectionToggle').setAttribute('aria-expanded', open);
+  function downloadFile(name, content, mime){
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportJSON(){
+    const payload = { app: 'LeakShark', version: 1, exportedAt: new Date().toISOString(), data: subs };
+    const name = 'leakshark-backup-' + fmtYMD(new Date()) + '.json';
+    downloadFile(name, JSON.stringify(payload, null, 2), 'application/json');
+    toast('Exported ' + subs.length + ' subscriptions to JSON');
+  }
+  function csvCell(v){
+    const s = String(v == null ? '' : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCSV(){
+    const rows = [
+      ['name', 'cost', 'cycle', 'renewal', 'cancel'].join(','),
+      ...subs.map(s => [s.name, s.cost, s.cycle, s.renewal, s.cancel || ''].map(csvCell).join(','))
+    ];
+    const name = 'leakshark-backup-' + fmtYMD(new Date()) + '.csv';
+    downloadFile(name, rows.join('\r\n'), 'text/csv');
+    toast('Exported ' + subs.length + ' subscriptions to CSV');
+  }
+  function importFromFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const d = parseBackupJSON(String(reader.result));
+        if(!confirm('Import ' + d.length + ' subscriptions? It will replace all current subscriptions.')) return;
+        applyRestoredData(d);
+        toast('Imported ' + d.length + ' subscriptions');
+      }catch(err){ toast('Import failed: invalid backup file'); }
+    };
+    reader.onerror = () => toast('Import failed: could not read the file');
+    reader.readAsText(file);
   }
 
   function updateDropboxUI(){
@@ -749,7 +909,6 @@
     const isConnected = !!dbx.accessToken;
     setup.style.display = isConnected ? 'none' : 'block';
     connected.style.display = isConnected ? 'block' : 'none';
-    if(!isConnected) setDbxDropdownOpen(true);
     document.getElementById('dbx-account').textContent = dbx.account ? ' as ' + dbx.account : '';
     document.getElementById('dbx-lastsync').textContent = dbx.lastSync ? 'last synced ' + dbx.lastSync : 'never synced';
     const autoUp = document.getElementById('dbx-auto-upload'), autoSy = document.getElementById('dbx-auto-sync');
@@ -760,16 +919,91 @@
   }
 
   document.getElementById('dbx-connect').addEventListener('click', dropboxConnect);
-  document.getElementById('dbxSectionToggle').addEventListener('click', () => {
-    const panel = document.querySelector('.sync-panel');
-    setDbxDropdownOpen(panel.classList.contains('closed'));
-  });
   document.getElementById('dbx-upload').addEventListener('click', () => dropboxUpload(false));
   document.getElementById('dbx-download').addEventListener('click', () => dropboxDownload(false));
   document.getElementById('dbx-disconnect').addEventListener('click', dropboxDisconnect);
   document.getElementById('dbx-auto-upload').addEventListener('change', e => dropboxSetAutoUpload(e.target.checked));
   document.getElementById('dbx-auto-sync').addEventListener('change', e => dropboxSetAutoSync(e.target.checked));
 
+  document.getElementById('export-json').addEventListener('click', exportJSON);
+  document.getElementById('export-csv').addEventListener('click', exportCSV);
+  const importFileEl = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => importFileEl.click());
+  importFileEl.addEventListener('change', () => {
+    if(importFileEl.files[0]) importFromFile(importFileEl.files[0]);
+    importFileEl.value = '';
+  });
+
+  window.addEventListener('pagehide', () => {
+    if(_syncTimer && dbx.accessToken && dbx.autoUpload){
+      clearTimeout(_syncTimer); _syncTimer = null;
+      dropboxUpload(true);
+    }
+  });
+
+  const REMINDER_KEY = 'leakshark.reminders';
+  const NOTIFIED_KEY = 'leakshark.notified';
+  const REMIND_DAYS = 3;
+  const remindersToggle = document.getElementById('reminders-toggle');
+  remindersToggle.checked = localStorage.getItem(REMINDER_KEY) === '1';
+  let notified = {};
+  try{ notified = JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {}; }catch(e){}
+
+  function remindersStatus(){
+    const el = document.getElementById('reminders-status');
+    if(!remindersToggle.checked){ el.textContent = ''; return; }
+    if(!('Notification' in window)){ el.textContent = 'Notifications are not supported in this browser.'; return; }
+    el.textContent = Notification.permission === 'granted'
+      ? 'Notifications on.'
+      : 'Notifications blocked — allow them in your browser settings.';
+  }
+  function setReminders(on){
+    localStorage.setItem(REMINDER_KEY, on ? '1' : '0');
+    if(on && 'Notification' in window && Notification.permission === 'default'){
+      Notification.requestPermission().then(per => {
+        if(per !== 'granted'){ localStorage.setItem(REMINDER_KEY, '0'); remindersToggle.checked = false; }
+        remindersStatus(); checkRenewals();
+      });
+    } else {
+      remindersStatus(); checkRenewals();
+    }
+    toast(on ? 'Reminders enabled' : 'Reminders disabled');
+  }
+  remindersToggle.addEventListener('change', e => setReminders(e.target.checked));
+
+  function checkRenewals(){
+    if(!remindersToggle.checked) return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    subs.filter(isActive).forEach(s => {
+      if(!s.renewal) return;
+      const n = daysFromToday(s.renewal);
+      if(n < 0 || n > REMIND_DAYS) return;
+      if(notified[s.id] === s.renewal) return;
+      notified[s.id] = s.renewal;
+      localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+      const body = cap(s.cycle) + ' · ' + money(s.cost) + (n === 0 ? ' · renews today' : ' · renews in ' + n + ' day' + (n === 1 ? '' : 's'));
+      try{ new Notification('LeakShark — ' + s.name + ' renewing soon', { body: body, icon: 'icon-192.png' }); }catch(e){}
+    });
+  }
+
+  checkRenewals(); remindersStatus();
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkRenewals(); });
+  setInterval(checkRenewals, 6 * 60 * 60 * 1000);
+
+  const mainPage = document.getElementById('mainPage');
+  const settingsPage = document.getElementById('settingsPage');
+  const settingsToggle = document.getElementById('settingsToggle');
+  function showSettings(on){
+    mainPage.style.display = on ? 'none' : '';
+    settingsPage.style.display = on ? '' : 'none';
+    settingsToggle.style.display = on ? 'none' : '';
+    window.scrollTo(0, 0);
+    if(!on) render();
+  }
+  document.getElementById('settingsToggle').addEventListener('click', () => showSettings(true));
+  document.getElementById('settingsBack').addEventListener('click', () => showSettings(false));
+
+  if(advanceRenewals()) save();
   render();
   updateDropboxUI(); dropboxHandleRedirect(); dropboxCheckForUpdates();
 })();
