@@ -1,3 +1,6 @@
+Version 1.1.2
+- Add a permanent badge for subscriptions that never end
+
 Version 1.1.1
 - Order active subscriptions by cancel date when one is set
 - Treat subscriptions whose cancel date is today as inactive

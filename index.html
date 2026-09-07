@@ -200,6 +200,20 @@
   .item:hover{background:var(--hover)}
   .item .index{font-size:12px;font-weight:700;color:var(--muted);min-width:24px;font-variant-numeric:tabular-nums}
   .item .name{font-size:16px;font-weight:700;overflow-wrap:anywhere}
+  .badge{
+    display:inline-block;
+    margin-left:10px;
+    padding:2px 8px;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    border-radius:20px;
+    vertical-align:2px;
+    white-space:nowrap;
+  }
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.3px}
   .item .price{font-size:16px;font-weight:700;text-align:right;white-space:nowrap}
   .item.is-canceled .name{color:var(--muted);text-decoration:line-through}
@@ -322,6 +336,10 @@
         <input id="cancel" type="date">
       </div>
     </div>
+    <label class="dbx-toggle" style="margin-top:24px">
+      <input type="checkbox" id="permanent">
+      <span>Permanent — this subscription never ends</span>
+    </label>
     <div class="form-actions">
       <button class="btn" id="saveBtn">Save</button>
       <button class="btn btn-ghost btn-cancel" id="cancelBtn">Cancel edit</button>
@@ -410,7 +428,7 @@
   </section>
   </div>
 
-  <footer>localStorage · Dropbox sync · v1.1.1</footer>
+  <footer>localStorage · Dropbox sync · v1.1.2</footer>
 </div>
 
 <div id="toast"></div>
@@ -487,14 +505,16 @@
     return s.cancel && !isNaN(Date.parse(s.cancel + 'T00:00:00')) ? renewTime(s.cancel) : renewTime(s.renewal);
   }
 
-  function rowHTML(s, days, meta, extraClass){
+  function rowHTML(s, days, meta, extraClass, inactive){
     return '<li class="item' + (extraClass || '') + '">' +
       '<span class="index">' + days + '</span>' +
       '<span class="nm"><span class="name">' + esc(s.name) + '</span>' +
+        (s.permanent ? '<span class="badge">Permanent</span>' : '') +
         '<div class="meta">' + meta + '</div></span>' +
       '<span class="price">' + money(s.cost) + '</span>' +
       '<span class="row-actions">' +
         '<button class="mini" data-act="edit" data-id="' + s.id + '">Edit</button>' +
+        (inactive ? '' : '<button class="mini" data-act="perm" data-id="' + s.id + '">' + (s.permanent ? 'Unpin' : 'Pin') + '</button>') +
         '<button class="mini mini-del" data-act="del" data-id="' + s.id + '">Delete</button>' +
       '</span></li>';
   }
@@ -569,7 +589,7 @@
         const n = daysFromToday(s.renewal);
         days = isNaN(n) ? '—' : n;
       }
-      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : ''));
+      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : '', inactive));
     });
   }
 
@@ -579,7 +599,8 @@
       cost: parseFloat(document.getElementById('cost').value) || 0,
       cycle: document.getElementById('cycle').value,
       renewal: document.getElementById('renewal').value,
-      cancel: document.getElementById('cancel').value
+      cancel: document.getElementById('cancel').value,
+      permanent: document.getElementById('permanent').checked
     };
   }
   function clearForm(){
@@ -588,6 +609,8 @@
     document.getElementById('cycle').value = 'monthly';
     document.getElementById('renewal').value = '';
     document.getElementById('cancel').value = '';
+    document.getElementById('cancel').disabled = false;
+    document.getElementById('permanent').checked = false;
   }
   function startEdit(id){
     const s = subs.find(x => x.id === id);
@@ -598,6 +621,8 @@
     document.getElementById('cycle').value = s.cycle;
     document.getElementById('renewal').value = s.renewal || '';
     document.getElementById('cancel').value = s.cancel || '';
+    document.getElementById('permanent').checked = !!s.permanent;
+    document.getElementById('cancel').disabled = !!s.permanent;
     formTitle.textContent = 'Edit: ' + s.name;
     saveBtn.textContent = 'Update';
     cancelBtn.style.display = 'inline-block';
@@ -622,6 +647,7 @@
   saveBtn.addEventListener('click', () => {
     const d = readForm();
     if(!d.name){ document.getElementById('name').focus(); return; }
+    if(d.permanent) d.cancel = '';
     if(editingId){
       const s = subs.find(x => x.id === editingId);
       if(s){ Object.assign(s, d); s.lastAdvance = ''; }
@@ -634,6 +660,10 @@
     render();
   });
   cancelBtn.addEventListener('click', cancelEdit);
+  document.getElementById('permanent').addEventListener('change', e => {
+    if(e.target.checked) document.getElementById('cancel').value = '';
+    document.getElementById('cancel').disabled = e.target.checked;
+  });
   document.getElementById('formToggle').addEventListener('click', () => {
     const panel = document.querySelector('.form-panel');
     setFormOpen(panel.classList.contains('closed'));
@@ -644,6 +674,15 @@
     if(!btn) return;
     const id = btn.dataset.id;
     if(btn.dataset.act === 'edit'){ startEdit(id); }
+    else if(btn.dataset.act === 'perm'){
+      const s = subs.find(x => x.id === id);
+      if(s){
+        s.permanent = !s.permanent;
+        if(s.permanent) s.cancel = '';
+        save();
+        render();
+      }
+    }
     else if(btn.dataset.act === 'del'){
       if(confirm('Delete this subscription?')){
         subs = subs.filter(x => x.id !== id);
@@ -884,8 +923,8 @@
   }
   function exportCSV(){
     const rows = [
-      ['name', 'cost', 'cycle', 'renewal', 'cancel'].join(','),
-      ...subs.map(s => [s.name, s.cost, s.cycle, s.renewal, s.cancel || ''].map(csvCell).join(','))
+      ['name', 'cost', 'cycle', 'renewal', 'cancel', 'permanent'].join(','),
+      ...subs.map(s => [s.name, s.cost, s.cycle, s.renewal, s.cancel || '', s.permanent ? 'yes' : ''].map(csvCell).join(','))
     ];
     const name = 'leakshark-backup-' + fmtYMD(new Date()) + '.csv';
     downloadFile(name, rows.join('\r\n'), 'text/csv');
