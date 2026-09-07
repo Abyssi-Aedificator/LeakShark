@@ -410,7 +410,7 @@
   </section>
   </div>
 
-  <footer>localStorage · Dropbox sync · v1.1.0</footer>
+  <footer>localStorage · Dropbox sync · v1.1.1</footer>
 </div>
 
 <div id="toast"></div>
@@ -481,7 +481,11 @@
   }
   function esc(v){ return String(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function cap(v){ return v.charAt(0).toUpperCase() + v.slice(1); }
-  function isActive(s){ return !s.cancel || daysFromToday(s.cancel) >= 0; }
+  function isActive(s){ return !s.cancel || daysFromToday(s.cancel) > 0; }
+
+  function sortKey(s){
+    return s.cancel && !isNaN(Date.parse(s.cancel + 'T00:00:00')) ? renewTime(s.cancel) : renewTime(s.renewal);
+  }
 
   function rowHTML(s, days, meta, extraClass){
     return '<li class="item' + (extraClass || '') + '">' +
@@ -528,7 +532,7 @@
   }
 
   function render(){
-    const active = subs.filter(isActive).sort((a, b) => renewTime(a.renewal) - renewTime(b.renewal));
+    const active = subs.filter(isActive).sort((a, b) => sortKey(a) - sortKey(b));
     const inactive = subs.filter(s => !isActive(s)).sort((a, b) => a.name.localeCompare(b.name));
     let total = 0, monthly = 0, yearly = 0;
     active.forEach(s => {
