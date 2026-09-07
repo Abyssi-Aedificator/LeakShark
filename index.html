@@ -505,7 +505,7 @@
     return s.cancel && !isNaN(Date.parse(s.cancel + 'T00:00:00')) ? renewTime(s.cancel) : renewTime(s.renewal);
   }
 
-  function rowHTML(s, days, meta, extraClass){
+  function rowHTML(s, days, meta, extraClass, inactive){
     return '<li class="item' + (extraClass || '') + '">' +
       '<span class="index">' + days + '</span>' +
       '<span class="nm"><span class="name">' + esc(s.name) + '</span>' +
@@ -514,7 +514,7 @@
       '<span class="price">' + money(s.cost) + '</span>' +
       '<span class="row-actions">' +
         '<button class="mini" data-act="edit" data-id="' + s.id + '">Edit</button>' +
-        '<button class="mini" data-act="perm" data-id="' + s.id + '">' + (s.permanent ? 'Unpin' : 'Pin') + '</button>' +
+        (inactive ? '' : '<button class="mini" data-act="perm" data-id="' + s.id + '">' + (s.permanent ? 'Unpin' : 'Pin') + '</button>') +
         '<button class="mini mini-del" data-act="del" data-id="' + s.id + '">Delete</button>' +
       '</span></li>';
   }
@@ -589,7 +589,7 @@
         const n = daysFromToday(s.renewal);
         days = isNaN(n) ? '—' : n;
       }
-      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : ''));
+      listEl.insertAdjacentHTML('beforeend', rowHTML(s, days, meta, inactive ? ' is-canceled' : '', inactive));
     });
   }
 
