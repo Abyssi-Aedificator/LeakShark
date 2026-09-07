@@ -1,5 +1,6 @@
 Version 1.1.1
-- Order active subscriptions by cancel date and treat cancel-today as inactive
+- Order active subscriptions by cancel date when one is set
+- Treat subscriptions whose cancel date is today as inactive
 
 Version 1.1.0
 - Sort active subscriptions by next renewal date, inactive alphabetically
